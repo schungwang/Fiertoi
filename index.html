@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="fiertoi.">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#E8A800">
+<meta name="description" content="fiertoi. — fier de toi · proud of you. Your private life journal.">
+<title>fiertoi.</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Plus+Jakarta+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --yellow: #E8A800;
+    --yellow-light: #FFF8D6;
+    --yellow-mid: #F5CC4A;
+    --yellow-dark: #7A5500;
+    --yellow-deep: #3D2800;
+    --teal: #1D9E75;
+    --teal-light: #E1F5EE;
+    --amber: #BA7517;
+    --amber-light: #FAEEDA;
+    --coral: #D85A30;
+    --coral-light: #FAECE7;
+    --white: #FFFFFF;
+    --off-white: #FAFAFA;
+    --border: rgba(200,150,0,0.18);
+    --text: #1A1A1A;
+    --text-sec: #555555;
+    --text-ter: #999999;
+    --screen-bg: #F5F4EF;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background: var(--screen-bg);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 16px 16px 0;
+  }
+
+  /* ── INSTALL BANNER ── */
+  .install-banner {
+    width: 100%;
+    max-width: 390px;
+    background: var(--yellow-deep);
+    border-radius: 12px;
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+    cursor: pointer;
+  }
+  .install-icon { width: 32px; height: 32px; border-radius: 8px; background: var(--yellow); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .install-text { flex: 1; }
+  .install-title { font-size: 12px; font-weight: 500; color: white; }
+  .install-sub { font-size: 10px; color: rgba(255,255,255,0.6); margin-top: 1px; }
+  .install-close { font-size: 16px; color: rgba(255,255,255,0.5); cursor: pointer; padding: 4px; flex-shrink: 0; }
+  .install-banner.hidden { display: none; }
+
+  /* ── DEVICE FRAME ── */
+  .device {
+    width: 100%;
+    max-width: 390px;
+    min-height: calc(100vh - 100px);
+    background: var(--white);
+    border-radius: 32px 32px 0 0;
+    overflow: hidden;
+    box-shadow: 0 -4px 40px rgba(0,0,0,0.08);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .status-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 22px 6px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text);
+    flex-shrink: 0;
+  }
+  .wordmark { font-family: 'Playfair Display', serif; font-size: 15px; color: var(--yellow); }
+
+  /* ── SCREENS ── */
+  .screen { display: none; flex-direction: column; flex: 1; overflow: hidden; }
+  .screen.active { display: flex; }
+
+  /* ── OVERLAY ── */
+  .overlay {
+    position: absolute; inset: 0;
+    background: rgba(0,0,0,0.5);
+    display: flex; align-items: flex-end;
+    z-index: 100;
+    animation: fadeIn 0.2s ease;
+  }
+  .overlay.hidden { display: none; }
+  .overlay-sheet {
+    background: var(--white);
+    border-radius: 24px 24px 0 0;
+    padding: 8px 0 0;
+    width: 100%;
+    animation: slideUp 0.3s cubic-bezier(0.32,0.72,0,1);
+  }
+  .sheet-handle { width: 36px; height: 4px; background: #E0E0E0; border-radius: 2px; margin: 0 auto 16px; }
+
+  @keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
+  @keyframes slideUp { from { transform: translateY(80px); opacity: 0 } to { transform: translateY(0); opacity: 1 } }
+
+  /* ── POLL SHEET ── */
+  .poll-content { padding: 0 20px 32px; }
+  .poll-eyebrow { font-size: 10px; letter-spacing: 0.08em; color: var(--text-ter); margin-bottom: 8px; text-transform: uppercase; }
+  .poll-question { font-family: 'Playfair Display', serif; font-size: 22px; color: var(--text); line-height: 1.3; margin-bottom: 4px; }
+  .poll-hint { font-size: 13px; color: var(--text-sec); margin-bottom: 20px; }
+  .poll-icon-wrap { display: flex; justify-content: center; margin-bottom: 14px; }
+  .poll-icon { width: 52px; height: 52px; border-radius: 50%; background: var(--yellow-light); display: flex; align-items: center; justify-content: center; }
+
+  .poll-opt {
+    display: flex; align-items: center; gap: 12px;
+    padding: 13px 14px; border-radius: 12px;
+    border: 1px solid var(--border);
+    margin-bottom: 8px; cursor: pointer;
+    transition: all 0.15s;
+    background: var(--off-white);
+  }
+  .poll-opt:active { transform: scale(0.98); }
+  .poll-opt.sel-y { background: var(--yellow-light); border-color: var(--yellow); }
+  .poll-opt.sel-teal { background: var(--teal-light); border-color: var(--teal); }
+  .poll-opt.sel-amber { background: var(--amber-light); border-color: var(--amber); }
+  .opt-emoji { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .opt-text { flex: 1; }
+  .opt-main { font-size: 14px; font-weight: 500; color: var(--text); }
+  .opt-sub { font-size: 11px; color: var(--text-ter); margin-top: 1px; }
+  .opt-dot { width: 18px; height: 18px; border-radius: 50%; border: 1.5px solid #DDD; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
+  .opt-dot.on-y { background: var(--yellow); border-color: var(--yellow); }
+  .opt-dot.on-teal { background: var(--teal); border-color: var(--teal); }
+  .opt-dot.on-amber { background: var(--amber); border-color: var(--amber); }
+  .opt-dot.on-y::after, .opt-dot.on-teal::after, .opt-dot.on-amber::after { content: ''; width: 6px; height: 6px; border-radius: 50%; background: white; }
+
+  .poll-btn {
+    width: 100%; padding: 14px; border-radius: 12px; border: none;
+    font-family: 'Plus Jakarta Sans', sans-serif; font-size: 14px; font-weight: 500;
+    background: var(--yellow); color: var(--yellow-deep); cursor: pointer;
+    opacity: 0.3; transition: opacity 0.2s; margin-top: 16px;
+  }
+  .poll-btn.ready { opacity: 1; }
+  .poll-skip { text-align: center; font-size: 12px; color: var(--text-ter); padding: 12px; cursor: pointer; }
+
+  /* ── BOTTOM NAV ── */
+  .bottom-nav {
+    display: flex; align-items: center; justify-content: space-around;
+    padding: 10px 16px 24px;
+    border-top: 1px solid rgba(0,0,0,0.06);
+    background: var(--white);
+    flex-shrink: 0;
+  }
+  .nav-item { display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; opacity: 0.35; transition: opacity 0.15s; padding: 4px 8px; }
+  .nav-item.active { opacity: 1; color: var(--yellow); }
+  .nav-item svg { width: 22px; height: 22px; }
+  .nav-label { font-size: 9px; font-weight: 500; }
+
+  /* ── HOME ── */
+  .home-header { padding: 8px 22px 14px; }
+  .home-greeting { font-family: 'Playfair Display', serif; font-size: 24px; color: var(--text); line-height: 1.3; }
+  .home-date { font-size: 12px; color: var(--text-ter); margin-top: 3px; }
+
+  .home-scroll { flex: 1; overflow-y: auto; padding: 0 14px 14px; -webkit-overflow-scrolling: touch; }
+  .home-scroll::-webkit-scrollbar { display: none; }
+
+  .streak-card {
+    background: var(--yellow-deep); border-radius: 16px;
+    padding: 16px 18px; margin-bottom: 12px;
+    display: flex; align-items: center;
+  }
+  .streak-num { font-family: 'Playfair Display', serif; font-size: 40px; color: var(--yellow); line-height: 1; }
+  .streak-right { margin-left: 16px; flex: 1; }
+  .streak-label { font-size: 11px; color: rgba(255,255,255,0.55); margin-bottom: 6px; }
+  .streak-msg { font-size: 12px; color: rgba(255,255,255,0.8); font-style: italic; margin-bottom: 8px; }
+  .sdots { display: flex; gap: 5px; }
+  .sdot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.2); }
+  .sdot.on { background: var(--yellow-mid); }
+
+  .section-hdr { display: flex; justify-content: space-between; align-items: center; margin: 14px 2px 8px; }
+  .section-title { font-size: 10px; font-weight: 500; color: var(--text-ter); letter-spacing: 0.05em; text-transform: uppercase; }
+  .section-link { font-size: 12px; color: var(--yellow); cursor: pointer; }
+
+  .wins-banner { background: var(--yellow-light); border-radius: 14px; padding: 12px 14px; margin-bottom: 12px; border: 1px solid var(--yellow-mid); }
+  .wins-label { font-size: 9px; color: var(--yellow-dark); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 6px; font-weight: 500; }
+  .wins-item { display: flex; align-items: center; gap: 8px; margin-bottom: 3px; }
+  .wdot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+  .wins-text { font-size: 12px; color: var(--yellow-dark); }
+
+  .moment-card {
+    background: var(--off-white); border-radius: 14px; padding: 12px 14px; margin-bottom: 8px;
+    border: 1px solid rgba(0,0,0,0.06); display: flex; align-items: center; gap: 12px; cursor: pointer;
+  }
+  .moment-card:active { transform: scale(0.98); }
+  .m-thumb { width: 46px; height: 46px; border-radius: 10px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+  .m-tag { font-size: 10px; font-weight: 500; padding: 2px 7px; border-radius: 8px; display: inline-block; margin-bottom: 3px; }
+  .m-title { font-size: 13px; font-weight: 500; color: var(--text); }
+  .m-time { font-size: 11px; color: var(--text-ter); margin-top: 1px; }
+
+  /* ── CAPTURE ── */
+  .cap-header { padding: 8px 22px 10px; border-bottom: 1px solid rgba(0,0,0,0.06); }
+  .cap-ts { font-size: 11px; color: var(--text-ter); margin-bottom: 3px; }
+  .cap-title { font-family: 'Playfair Display', serif; font-size: 22px; color: var(--text); }
+
+  .cap-scroll { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+  .cap-scroll::-webkit-scrollbar { display: none; }
+
+  .photo-zone {
+    margin: 14px; height: 160px; border-radius: 16px;
+    background: var(--off-white); border: 1.5px dashed rgba(200,150,0,0.3);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 8px; cursor: pointer; transition: all 0.15s;
+  }
+  .photo-zone:active { background: var(--yellow-light); border-color: var(--yellow); }
+  .photo-zone-icon { width: 40px; height: 40px; border-radius: 50%; background: var(--yellow-light); display: flex; align-items: center; justify-content: center; }
+  .photo-zone-text { font-size: 13px; color: var(--text-sec); }
+
+  .cap-sec { padding: 0 14px 14px; }
+  .cap-lbl { font-size: 10px; color: var(--text-ter); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 10px; font-weight: 500; }
+  .tag-wrap { display: flex; flex-wrap: wrap; gap: 6px; }
+  .ctag {
+    font-size: 12px; padding: 6px 12px; border-radius: 20px;
+    border: 1px solid rgba(0,0,0,0.1); color: var(--text-sec);
+    cursor: pointer; background: var(--off-white); transition: all 0.15s;
+  }
+  .ctag:active { transform: scale(0.96); }
+  .ctag.on { background: var(--yellow-light); border-color: var(--yellow); color: var(--yellow-dark); font-weight: 500; }
+
+  .person-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+  .p-av { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 500; flex-shrink: 0; }
+  .p-name { font-size: 13px; color: var(--text); font-weight: 500; }
+  .p-folder { font-size: 11px; color: var(--text-ter); }
+  .add-person { font-size: 12px; color: var(--text-ter); border: 1px dashed rgba(0,0,0,0.15); border-radius: 20px; padding: 5px 12px; cursor: pointer; display: inline-block; }
+
+  .place-row { display: flex; align-items: center; gap: 8px; background: var(--off-white); border: 1px solid rgba(0,0,0,0.08); border-radius: 10px; padding: 10px 12px; }
+  .place-input { border: none; background: none; font-size: 13px; color: var(--text); font-family: 'Plus Jakarta Sans', sans-serif; outline: none; flex: 1; }
+  .place-input::placeholder { color: var(--text-ter); }
+  .no-track { font-size: 10px; color: var(--text-ter); margin-top: 6px; display: flex; align-items: center; gap: 4px; }
+
+  .save-btn {
+    margin: 14px; padding: 15px; border-radius: 14px; border: none;
+    background: var(--yellow); color: var(--yellow-deep);
+    font-family: 'Plus Jakarta Sans', sans-serif; font-size: 15px; font-weight: 500;
+    cursor: pointer; width: calc(100% - 28px);
+  }
+  .save-btn:active { opacity: 0.85; transform: scale(0.99); }
+
+  /* ── PEOPLE ── */
+  .ppl-header { padding: 8px 22px 12px; }
+  .ppl-title { font-family: 'Playfair Display', serif; font-size: 24px; color: var(--text); line-height: 1.3; }
+
+  .ppl-scroll { flex: 1; overflow-y: auto; padding: 0 14px 14px; -webkit-overflow-scrolling: touch; }
+  .ppl-scroll::-webkit-scrollbar { display: none; }
+
+  .pc {
+    background: var(--off-white); border-radius: 16px; padding: 14px; margin-bottom: 10px;
+    border: 1px solid rgba(0,0,0,0.06); cursor: pointer;
+  }
+  .pc:active { transform: scale(0.99); }
+  .pc-top { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+  .pc-av { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 500; flex-shrink: 0; }
+  .pc-name { font-size: 15px; font-weight: 500; color: var(--text); }
+  .pc-since { font-size: 11px; color: var(--text-ter); margin-top: 2px; }
+  .pc-stats { display: flex; gap: 16px; margin-bottom: 10px; }
+  .pc-stat-num { font-family: 'Playfair Display', serif; font-size: 20px; color: var(--text); }
+  .pc-stat-lbl { font-size: 10px; color: var(--text-ter); }
+  .pc-gift { background: var(--yellow-light); border-radius: 10px; padding: 9px 12px; border: 1px solid var(--yellow-mid); font-size: 12px; color: var(--yellow-dark); text-align: center; font-weight: 500; cursor: pointer; }
+  .pc-gift:active { opacity: 0.85; }
+
+  /* ── DAILY WINS ── */
+  .wins-scroll { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+  .wins-scroll::-webkit-scrollbar { display: none; }
+  .wins-hero { background: var(--yellow-deep); padding: 22px; }
+  .wins-ey { font-size: 10px; color: rgba(255,255,255,0.5); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 5px; }
+  .wins-hl { font-family: 'Playfair Display', serif; font-size: 28px; color: white; line-height: 1.25; margin-bottom: 4px; }
+  .wins-dt { font-size: 12px; color: rgba(255,255,255,0.45); }
+  .wins-body { padding: 18px 18px 0; }
+  .win-row { display: flex; align-items: flex-start; gap: 10px; padding: 12px 0; border-bottom: 1px solid rgba(0,0,0,0.06); }
+  .win-row:last-child { border-bottom: none; }
+  .win-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
+  .win-main { font-size: 14px; font-weight: 500; color: var(--text); }
+  .win-sub { font-size: 11px; color: var(--text-ter); margin-top: 2px; }
+  .enc-received { margin: 14px; background: var(--yellow-light); border-radius: 14px; padding: 14px; border: 1px solid var(--yellow-mid); }
+  .enc-from-lbl { font-size: 10px; color: var(--yellow-dark); letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 8px; font-weight: 500; }
+  .enc-msg-text { font-family: 'Playfair Display', serif; font-size: 16px; color: var(--yellow-deep); line-height: 1.55; font-style: italic; }
+  .enc-sig-text { font-size: 13px; color: var(--yellow); margin-top: 8px; font-weight: 500; }
+  .wins-signoff { padding: 18px; text-align: center; }
+  .fiertoi-word { font-family: 'Playfair Display', serif; font-size: 32px; color: var(--yellow); }
+  .fiertoi-meaning { font-size: 12px; color: var(--text-ter); font-style: italic; margin-top: 4px; }
+  .wrap-btn { margin: 0 18px 20px; padding: 14px; border-radius: 14px; border: none; background: var(--yellow); color: var(--yellow-deep); font-family: 'Plus Jakarta Sans', sans-serif; font-size: 14px; font-weight: 500; cursor: pointer; width: calc(100% - 36px); }
+  .wrap-btn:active { opacity: 0.85; }
+
+  /* ── ENCOURAGE ── */
+  .enc-header { padding: 8px 22px 0; }
+  .enc-title { font-family: 'Playfair Display', serif; font-size: 22px; color: var(--text); padding: 8px 0 12px; }
+  .enc-scroll { flex: 1; overflow-y: auto; padding: 14px; -webkit-overflow-scrolling: touch; }
+  .enc-scroll::-webkit-scrollbar { display: none; }
+  .enc-hero { background: var(--yellow-deep); border-radius: 16px; padding: 18px; margin-bottom: 14px; }
+  .enc-ey { font-size: 10px; color: rgba(255,255,255,0.5); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 5px; }
+  .enc-hl { font-family: 'Playfair Display', serif; font-size: 22px; color: white; line-height: 1.3; margin-bottom: 5px; }
+  .enc-sb { font-size: 12px; color: rgba(255,255,255,0.65); line-height: 1.6; }
+  .enc-ctx-pill { display: inline-flex; align-items: center; gap: 6px; margin-top: 12px; background: rgba(255,255,255,0.1); border-radius: 20px; padding: 5px 12px; font-size: 12px; color: rgba(255,255,255,0.85); border: 1px solid rgba(255,255,255,0.2); }
+  .live-dot { width: 6px; height: 6px; border-radius: 50%; background: #4CAF50; animation: pulse 2s infinite; flex-shrink: 0; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+  .write-zone { background: var(--off-white); border-radius: 14px; padding: 14px; margin-bottom: 12px; border: 1px solid rgba(0,0,0,0.08); }
+  .write-lbl { font-size: 11px; color: var(--text-ter); margin-bottom: 10px; }
+  .write-ta { width: 100%; border: none; background: none; font-family: 'Playfair Display', serif; font-size: 17px; color: var(--text); resize: none; outline: none; line-height: 1.65; min-height: 110px; }
+  .write-ta::placeholder { color: var(--text-ter); font-style: italic; }
+  .char-row { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; }
+  .anon-note { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--text-ter); }
+  .char-ct { font-size: 11px; color: var(--text-ter); }
+  .send-btn { width: 100%; padding: 14px; border-radius: 12px; border: none; background: var(--yellow); color: var(--yellow-deep); font-family: 'Plus Jakarta Sans', sans-serif; font-size: 14px; font-weight: 500; cursor: pointer; opacity: 0.35; transition: opacity 0.2s; }
+  .send-btn.go { opacity: 1; }
+  .send-btn:active { opacity: 0.85; }
+  .maybe-lnk { text-align: center; font-size: 12px; color: var(--text-ter); padding: 10px; cursor: pointer; }
+  .cycle-lnk { text-align: center; font-size: 12px; color: var(--yellow); padding: 6px; cursor: pointer; }
+
+  /* ── COLOR PICKER ── */
+  .cp-btn {
+    position: fixed; bottom: 90px; right: 16px;
+    width: 42px; height: 42px; border-radius: 50%;
+    background: var(--yellow); border: 3px solid white;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+    cursor: pointer; z-index: 200;
+    display: flex; align-items: center; justify-content: center;
+    transition: transform 0.2s;
+  }
+  .cp-btn:active { transform: scale(0.92); }
+  .cp-panel {
+    position: fixed; bottom: 144px; right: 16px;
+    background: white; border-radius: 18px; padding: 14px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.14);
+    z-index: 199; display: none; width: 210px;
+    border: 1px solid rgba(0,0,0,0.08);
+  }
+  .cp-panel.open { display: block; animation: popIn 0.2s cubic-bezier(0.32,0.72,0,1); }
+  @keyframes popIn { from{opacity:0;transform:scale(0.9) translateY(8px)} to{opacity:1;transform:scale(1) translateY(0)} }
+  .cp-title { font-size: 10px; font-weight: 500; color: #999; letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 10px; }
+  .cp-swatches { display: grid; grid-template-columns: repeat(5,1fr); gap: 7px; margin-bottom: 12px; }
+  .cp-sw { width: 34px; height: 34px; border-radius: 50%; cursor: pointer; border: 3px solid transparent; transition: all 0.15s; position: relative; }
+  .cp-sw:active { transform: scale(1.1); }
+  .cp-sw.active { border-color: #1A1A1A; }
+  .cp-sw.active::after { content:''; position:absolute; inset:3px; border-radius:50%; border:2px solid white; }
+  .cp-div { height: 1px; background: #f0f0f0; margin: 10px 0; }
+  .cp-lbl { font-size: 10px; color: #999; margin-bottom: 7px; }
+  .cp-row { display: flex; align-items: center; gap: 6px; }
+  .cp-color { width: 100%; height: 32px; border-radius: 7px; border: 1px solid #e0e0e0; cursor: pointer; padding: 2px; }
+  .cp-hex { font-size: 11px; color: #555; font-family: monospace; background: #f5f5f5; border: 1px solid #e0e0e0; border-radius: 6px; padding: 5px 7px; width: 76px; }
+</style>
+</head>
+<body>
+
+<!-- ADD TO HOME SCREEN BANNER -->
+<div class="install-banner" id="install-banner">
+  <div class="install-icon">
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="#3D2800" stroke-width="1.5"><path d="M9 2v10M5 8l4 4 4-4"/><rect x="2" y="13" width="14" height="3" rx="1.5"/></svg>
+  </div>
+  <div class="install-text">
+    <div class="install-title">Add fiertoi. to your home screen</div>
+    <div class="install-sub">Tap Share → "Add to Home Screen" · feels like a real app</div>
+  </div>
+  <div class="install-close" onclick="document.getElementById('install-banner').classList.add('hidden')">×</div>
+</div>
+
+<div class="device">
+  <div class="status-bar">
+    <span id="clock">9:41</span>
+    <span class="wordmark">fiertoi.</span>
+    <span>●●●</span>
+  </div>
+
+  <!-- HOME -->
+  <div class="screen active" id="home">
+    <div class="home-header">
+      <div class="home-greeting">Good morning,<br>you're building something.</div>
+      <div class="home-date" id="home-date"></div>
+    </div>
+    <div class="home-scroll">
+      <div class="streak-card">
+        <div class="streak-num">12</div>
+        <div class="streak-right">
+          <div class="streak-label">day streak</div>
+          <div class="streak-msg">don't break it now</div>
+          <div class="sdots">
+            <div class="sdot on"></div><div class="sdot on"></div><div class="sdot on"></div>
+            <div class="sdot on"></div><div class="sdot on"></div><div class="sdot on"></div>
+            <div class="sdot on"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="wins-banner">
+        <div class="wins-label">today's wins so far</div>
+        <div class="wins-item"><div class="wdot" style="background:var(--yellow);"></div><div class="wins-text">You ground through it · gym session</div></div>
+        <div class="wins-item"><div class="wdot" style="background:var(--teal);"></div><div class="wins-text">You made time for people · lunch with Jamie</div></div>
+      </div>
+
+      <div class="section-hdr">
+        <div class="section-title">recent moments</div>
+        <div class="section-link">see all</div>
+      </div>
+
+      <div class="moment-card">
+        <div class="m-thumb" style="background:var(--yellow-light);">
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="#E8A800" stroke-width="1.5"><rect x="3" y="4" width="16" height="14" rx="3"/><circle cx="11" cy="11" r="4"/></svg>
+        </div>
+        <div>
+          <div class="m-tag" style="background:var(--yellow-light);color:var(--yellow-dark);">grinding</div>
+          <div class="m-title">Morning gym session</div>
+          <div class="m-time">PureGym · 7:30 AM</div>
+        </div>
+      </div>
+      <div class="moment-card">
+        <div class="m-thumb" style="background:var(--teal-light);">
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="#1D9E75" stroke-width="1.5"><rect x="3" y="4" width="16" height="14" rx="3"/><circle cx="11" cy="11" r="4"/></svg>
+        </div>
+        <div>
+          <div class="m-tag" style="background:var(--teal-light);color:#085041;">with friends</div>
+          <div class="m-title">Lunch with Jamie</div>
+          <div class="m-time">The Weyside · 1:15 PM</div>
+        </div>
+      </div>
+      <div class="moment-card">
+        <div class="m-thumb" style="background:var(--amber-light);">
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="#BA7517" stroke-width="1.5"><rect x="3" y="4" width="16" height="14" rx="3"/><circle cx="11" cy="11" r="4"/></svg>
+        </div>
+        <div>
+          <div class="m-tag" style="background:var(--amber-light);color:#633806;">studying</div>
+          <div class="m-title">Revision session</div>
+          <div class="m-time">The Library · 3:00 PM</div>
+        </div>
+      </div>
+    </div>
+    <div class="bottom-nav">
+      <div class="nav-item active" onclick="goTo('home',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span class="nav-label">home</span></div>
+      <div class="nav-item" onclick="goTo('capture',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg><span class="nav-label">capture</span></div>
+      <div class="nav-item" onclick="goTo('people',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg><span class="nav-label">people</span></div>
+      <div class="nav-item" onclick="goTo('wins',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg><span class="nav-label">my day</span></div>
+      <div class="nav-item" onclick="goTo('encourage',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg><span class="nav-label">encourage</span></div>
+    </div>
+  </div>
+
+  <!-- CAPTURE -->
+  <div class="screen" id="capture">
+    <div class="cap-header">
+      <div class="cap-ts" id="cap-ts"></div>
+      <div class="cap-title">add to my day</div>
+    </div>
+    <div class="cap-scroll">
+      <div class="photo-zone" onclick="this.style.background='var(--yellow-light)';this.style.borderColor='var(--yellow)'">
+        <div class="photo-zone-icon"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#E8A800" stroke-width="1.5"><rect x="2" y="4" width="16" height="13" rx="2"/><circle cx="10" cy="10.5" r="3"/><path d="M7 4l1-2h4l1 2"/></svg></div>
+        <div class="photo-zone-text">capture this moment</div>
+      </div>
+      <div class="cap-sec">
+        <div class="cap-lbl">what are you up to?</div>
+        <div class="tag-wrap">
+          <div class="ctag" onclick="selectTag(this)">grinding</div>
+          <div class="ctag" onclick="selectTag(this)">with friends</div>
+          <div class="ctag" onclick="selectTag(this)">studying</div>
+          <div class="ctag" onclick="selectTag(this)">special occasion</div>
+          <div class="ctag" onclick="selectTag(this)">family time</div>
+          <div class="ctag" onclick="selectTag(this)">self care</div>
+        </div>
+      </div>
+      <div class="cap-sec">
+        <div class="cap-lbl">who are you with?</div>
+        <div class="person-row">
+          <div class="p-av" style="background:var(--teal-light);color:var(--teal);">JR</div>
+          <div><div class="p-name">Jamie R.</div><div class="p-folder">saved to your Jamie folder</div></div>
+        </div>
+        <div class="add-person">+ add person</div>
+      </div>
+      <div class="cap-sec">
+        <div class="cap-lbl">where are you? <span style="text-transform:none;letter-spacing:0;font-weight:300;">(optional)</span></div>
+        <div class="place-row">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#999" stroke-width="1.5"><path d="M7 1.5A3.5 3.5 0 0110.5 5c0 3-3.5 7.5-3.5 7.5S3.5 8 3.5 5A3.5 3.5 0 017 1.5z"/><circle cx="7" cy="5" r="1.2"/></svg>
+          <input class="place-input" type="text" placeholder="e.g. PureGym, the library, home…">
+        </div>
+        <div class="no-track">
+          <svg width="11" height="11" viewBox="0 0 11 11" fill="none" stroke="#999" stroke-width="1.3"><circle cx="5.5" cy="5.5" r="4.5"/><line x1="3" y1="3" x2="8" y2="8"/></svg>
+          you type it — we never track your location, ever
+        </div>
+      </div>
+    </div>
+    <button class="save-btn" onclick="saveMoment()">add to my day</button>
+    <div class="bottom-nav">
+      <div class="nav-item" onclick="goTo('home',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span class="nav-label">home</span></div>
+      <div class="nav-item active" onclick="goTo('capture',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg><span class="nav-label">capture</span></div>
+      <div class="nav-item" onclick="goTo('people',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg><span class="nav-label">people</span></div>
+      <div class="nav-item" onclick="goTo('wins',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg><span class="nav-label">my day</span></div>
+      <div class="nav-item" onclick="goTo('encourage',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg><span class="nav-label">encourage</span></div>
+    </div>
+  </div>
+
+  <!-- PEOPLE -->
+  <div class="screen" id="people">
+    <div class="ppl-header"><div class="ppl-title">people in<br>your story</div></div>
+    <div class="ppl-scroll">
+      <div class="pc">
+        <div class="pc-top">
+          <div class="pc-av" style="background:var(--teal-light);color:var(--teal);">JR</div>
+          <div><div class="pc-name">Jamie R.</div><div class="pc-since">in your life · 14 months</div></div>
+        </div>
+        <div class="pc-stats">
+          <div><div class="pc-stat-num">38</div><div class="pc-stat-lbl">days together</div></div>
+          <div><div class="pc-stat-num">6</div><div class="pc-stat-lbl">occasions</div></div>
+          <div><div class="pc-stat-num">12</div><div class="pc-stat-lbl">places</div></div>
+        </div>
+        <div class="pc-gift" onclick="giftAlert('Jamie')">turn this into a gift →</div>
+      </div>
+      <div class="pc">
+        <div class="pc-top">
+          <div class="pc-av" style="background:var(--yellow-light);color:var(--yellow-dark);">SK</div>
+          <div><div class="pc-name">Sofia K.</div><div class="pc-since">in your life · 8 months</div></div>
+        </div>
+        <div class="pc-stats">
+          <div><div class="pc-stat-num">24</div><div class="pc-stat-lbl">days together</div></div>
+          <div><div class="pc-stat-num">4</div><div class="pc-stat-lbl">occasions</div></div>
+          <div><div class="pc-stat-num">7</div><div class="pc-stat-lbl">places</div></div>
+        </div>
+        <div class="pc-gift" onclick="giftAlert('Sofia')">turn this into a gift →</div>
+      </div>
+      <div class="pc">
+        <div class="pc-top">
+          <div class="pc-av" style="background:var(--coral-light);color:var(--coral);">TM</div>
+          <div><div class="pc-name">Tyler M.</div><div class="pc-since">in your life · 3 months</div></div>
+        </div>
+        <div class="pc-stats">
+          <div><div class="pc-stat-num">11</div><div class="pc-stat-lbl">days together</div></div>
+          <div><div class="pc-stat-num">2</div><div class="pc-stat-lbl">occasions</div></div>
+          <div><div class="pc-stat-num">4</div><div class="pc-stat-lbl">places</div></div>
+        </div>
+        <div class="pc-gift" onclick="giftAlert('Tyler')">turn this into a gift →</div>
+      </div>
+    </div>
+    <div class="bottom-nav">
+      <div class="nav-item" onclick="goTo('home',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span class="nav-label">home</span></div>
+      <div class="nav-item" onclick="goTo('capture',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg><span class="nav-label">capture</span></div>
+      <div class="nav-item active" onclick="goTo('people',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg><span class="nav-label">people</span></div>
+      <div class="nav-item" onclick="goTo('wins',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg><span class="nav-label">my day</span></div>
+      <div class="nav-item" onclick="goTo('encourage',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg><span class="nav-label">encourage</span></div>
+    </div>
+  </div>
+
+  <!-- DAILY WINS -->
+  <div class="screen" id="wins">
+    <div class="wins-scroll">
+      <div class="wins-hero">
+        <div class="wins-ey">end of day</div>
+        <div class="wins-hl">You showed<br>up today.</div>
+        <div class="wins-dt" id="wins-date"></div>
+      </div>
+      <div class="wins-body">
+        <div class="win-row"><div class="win-dot" style="background:var(--yellow);"></div><div><div class="win-main">You ground through it</div><div class="win-sub">gym + work session · twice today</div></div></div>
+        <div class="win-row"><div class="win-dot" style="background:var(--teal);"></div><div><div class="win-main">You made time for people</div><div class="win-sub">lunch with Jamie · moment captured</div></div></div>
+        <div class="win-row"><div class="win-dot" style="background:var(--amber);"></div><div><div class="win-main">You studied</div><div class="win-sub">1 session · 11 day study streak</div></div></div>
+      </div>
+      <div class="enc-received">
+        <div class="enc-from-lbl">while you were grinding, a stranger sent you this</div>
+        <div class="enc-msg-text">"The work you put in when no one's watching is the work that actually builds something. Keep going."</div>
+        <div class="enc-sig-text">— fiertoi.</div>
+      </div>
+      <div class="wins-signoff">
+        <div class="fiertoi-word">fiertoi.</div>
+        <div class="fiertoi-meaning">fier de toi · proud of you</div>
+      </div>
+      <button class="wrap-btn" onclick="showAfterPoll()">wrap up my day</button>
+    </div>
+    <div class="bottom-nav">
+      <div class="nav-item" onclick="goTo('home',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span class="nav-label">home</span></div>
+      <div class="nav-item" onclick="goTo('capture',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg><span class="nav-label">capture</span></div>
+      <div class="nav-item" onclick="goTo('people',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg><span class="nav-label">people</span></div>
+      <div class="nav-item active" onclick="goTo('wins',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg><span class="nav-label">my day</span></div>
+      <div class="nav-item" onclick="goTo('encourage',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg><span class="nav-label">encourage</span></div>
+    </div>
+  </div>
+
+  <!-- ENCOURAGE -->
+  <div class="screen" id="encourage">
+    <div class="enc-header"><div class="enc-title">send something real</div></div>
+    <div class="enc-scroll">
+      <div class="enc-hero">
+        <div class="enc-ey">someone right now is</div>
+        <div class="enc-hl" id="enc-hl">grinding</div>
+        <div class="enc-sb" id="enc-sb">They logged this a little while ago. They don't know you exist. You don't know who they are. You just know they're putting in the work.</div>
+        <div class="enc-ctx-pill"><div class="live-dot"></div><span id="enc-tag">grinding · right now</span></div>
+      </div>
+      <div class="write-zone">
+        <div class="write-lbl">write them something real</div>
+        <textarea class="write-ta" id="enc-ta" maxlength="280" placeholder="What would you want to hear if it was you?" oninput="handleEnc(this)"></textarea>
+        <div class="char-row">
+          <div class="anon-note"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="#999" stroke-width="1.3"><circle cx="6" cy="6" r="5"/><path d="M6 5v3M6 3.5v.3"/></svg>keep it kind · sent anonymously</div>
+          <div class="char-ct" id="enc-chars">280</div>
+        </div>
+      </div>
+      <button class="send-btn" id="enc-send" onclick="sendEnc()">send it</button>
+      <div class="maybe-lnk">maybe another time</div>
+      <div class="cycle-lnk" onclick="cycleCtx()">show me a different moment →</div>
+    </div>
+    <div class="bottom-nav">
+      <div class="nav-item" onclick="goTo('home',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span class="nav-label">home</span></div>
+      <div class="nav-item" onclick="goTo('capture',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg><span class="nav-label">capture</span></div>
+      <div class="nav-item" onclick="goTo('people',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg><span class="nav-label">people</span></div>
+      <div class="nav-item" onclick="goTo('wins',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg><span class="nav-label">my day</span></div>
+      <div class="nav-item active" onclick="goTo('encourage',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg><span class="nav-label">encourage</span></div>
+    </div>
+  </div>
+
+  <!-- ENTRY POLL -->
+  <div class="overlay" id="before-overlay">
+    <div class="overlay-sheet">
+      <div class="sheet-handle"></div>
+      <div class="poll-content">
+        <div class="poll-eyebrow">daily check-in</div>
+        <div class="poll-question">How are we feeling today?</div>
+        <div class="poll-hint">Be honest — this is just for you.</div>
+        <div class="poll-opt" id="bp1" onclick="pickB('bp1','y','br1')">
+          <div class="opt-emoji" style="background:var(--yellow-light);"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#E8A800" stroke-width="1.5"><circle cx="10" cy="10" r="7.5"/><path d="M7 11.5s1 2 3 2 3-2 3-2"/><circle cx="7.5" cy="8.5" r="1" fill="#E8A800"/><circle cx="12.5" cy="8.5" r="1" fill="#E8A800"/></svg></div>
+          <div class="opt-text"><div class="opt-main">Amazing and slaying</div></div>
+          <div class="opt-dot" id="br1"></div>
+        </div>
+        <div class="poll-opt" id="bp2" onclick="pickB('bp2','teal','br2')">
+          <div class="opt-emoji" style="background:var(--teal-light);"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#1D9E75" stroke-width="1.5"><circle cx="10" cy="10" r="7.5"/><path d="M7 12h6"/><circle cx="7.5" cy="8.5" r="1" fill="#1D9E75"/><circle cx="12.5" cy="8.5" r="1" fill="#1D9E75"/></svg></div>
+          <div class="opt-text"><div class="opt-main">Decent, no big deal</div><div class="opt-sub">same old, same old</div></div>
+          <div class="opt-dot" id="br2"></div>
+        </div>
+        <div class="poll-opt" id="bp3" onclick="pickB('bp3','amber','br3')">
+          <div class="opt-emoji" style="background:var(--amber-light);"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#BA7517" stroke-width="1.5"><circle cx="10" cy="10" r="7.5"/><path d="M7 13s1-2 3-2 3 2 3 2"/><circle cx="7.5" cy="8.5" r="1" fill="#BA7517"/><circle cx="12.5" cy="8.5" r="1" fill="#BA7517"/></svg></div>
+          <div class="opt-text"><div class="opt-main">Tomorrow will be better</div></div>
+          <div class="opt-dot" id="br3"></div>
+        </div>
+        <button class="poll-btn" id="before-btn" onclick="submitBefore()">log how I'm feeling</button>
+        <div class="poll-skip" onclick="document.getElementById('before-overlay').classList.add('hidden')">skip for today</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AFTER POLL -->
+  <div class="overlay hidden" id="after-overlay">
+    <div class="overlay-sheet">
+      <div class="sheet-handle"></div>
+      <div class="poll-content">
+        <div class="poll-icon-wrap"><div class="poll-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#E8A800" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg></div></div>
+        <div class="poll-question" style="text-align:center;">You should be proud.</div>
+        <div class="poll-hint" style="text-align:center;">How are we feeling now?</div>
+        <div class="poll-opt" id="ap1" onclick="pickA('ap1','y','ar1')">
+          <div class="opt-emoji" style="background:var(--yellow-light);"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#E8A800" stroke-width="1.5"><path d="M10 2l2 5h5.5l-4.5 3.3 1.7 5.2L10 12.5l-4.7 3 1.7-5.2L2.5 7H8z"/></svg></div>
+          <div class="opt-text"><div class="opt-main">I'm killing it</div></div>
+          <div class="opt-dot" id="ar1"></div>
+        </div>
+        <div class="poll-opt" id="ap2" onclick="pickA('ap2','teal','ar2')">
+          <div class="opt-emoji" style="background:var(--teal-light);"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#1D9E75" stroke-width="1.5"><circle cx="10" cy="10" r="7.5"/><path d="M7 11.5s1 2 3 2 3-2 3-2"/><circle cx="7.5" cy="8.5" r="1" fill="#1D9E75"/><circle cx="12.5" cy="8.5" r="1" fill="#1D9E75"/></svg></div>
+          <div class="opt-text"><div class="opt-main">I'm grateful for today</div></div>
+          <div class="opt-dot" id="ar2"></div>
+        </div>
+        <div class="poll-opt" id="ap3" onclick="pickA('ap3','amber','ar3')">
+          <div class="opt-emoji" style="background:var(--amber-light);"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#BA7517" stroke-width="1.5"><path d="M3 15l4-5 2.5 2.5 4-6 2.5 3.5"/><circle cx="16" cy="6" r="2" fill="#BA7517"/></svg></div>
+          <div class="opt-text"><div class="opt-main">Looking forward to tomorrow</div></div>
+          <div class="opt-dot" id="ar3"></div>
+        </div>
+        <button class="poll-btn" id="after-btn" onclick="submitAfter()">done · fiertoi.</button>
+        <div class="poll-skip" onclick="document.getElementById('after-overlay').classList.add('hidden')">skip</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- COLOR PICKER -->
+<button class="cp-btn" id="cp-btn" onclick="toggleCP()" title="change your colour">
+  <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="#3D2800" stroke-width="1.5"><circle cx="9" cy="9" r="7"/><path d="M9 2v2M9 14v2M2 9h2M14 9h2M4.1 4.1l1.4 1.4M12.5 12.5l1.4 1.4M4.1 13.9l1.4-1.4M12.5 5.5l1.4-1.4"/></svg>
+</button>
+
+<div class="cp-panel" id="cp-panel">
+  <div class="cp-title">your colour</div>
+  <div class="cp-swatches">
+    <div class="cp-sw active" style="background:#E8A800" onclick="applyColor('#E8A800',this)"></div>
+    <div class="cp-sw" style="background:#E85D4A" onclick="applyColor('#E85D4A',this)"></div>
+    <div class="cp-sw" style="background:#3DB88A" onclick="applyColor('#3DB88A',this)"></div>
+    <div class="cp-sw" style="background:#6B8CFF" onclick="applyColor('#6B8CFF',this)"></div>
+    <div class="cp-sw" style="background:#C46BE8" onclick="applyColor('#C46BE8',this)"></div>
+    <div class="cp-sw" style="background:#FF7AAB" onclick="applyColor('#FF7AAB',this)"></div>
+    <div class="cp-sw" style="background:#FF8C42" onclick="applyColor('#FF8C42',this)"></div>
+    <div class="cp-sw" style="background:#4ABDE8" onclick="applyColor('#4ABDE8',this)"></div>
+    <div class="cp-sw" style="background:#534AB7" onclick="applyColor('#534AB7',this)"></div>
+    <div class="cp-sw" style="background:#2B2B2B" onclick="applyColor('#2B2B2B',this)"></div>
+  </div>
+  <div class="cp-div"></div>
+  <div class="cp-lbl">or pick your own</div>
+  <div class="cp-row">
+    <input type="color" class="cp-color" id="cp-input" value="#E8A800" oninput="applyColor(this.value,null)">
+    <input type="text" class="cp-hex" id="cp-hex" value="#E8A800" maxlength="7" onchange="applyHex(this.value)">
+  </div>
+</div>
+
+<script>
+// ── DATE & CLOCK ──
+const now = new Date();
+const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const dateStr = days[now.getDay()] + ', ' + months[now.getMonth()] + ' ' + now.getDate();
+const timeStr = now.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+
+document.getElementById('home-date').textContent = dateStr;
+document.getElementById('wins-date').textContent = dateStr + ' · 3 moments';
+document.getElementById('cap-ts').textContent = dateStr + ' · ' + timeStr;
+document.getElementById('clock').textContent = timeStr;
+
+// ── NAV ──
+function goTo(id, el) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if (el) {
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    // activate both nav items for that screen
+    document.querySelectorAll('.nav-item').forEach(n => {
+      if (n.getAttribute('onclick') && n.getAttribute('onclick').includes("'"+id+"'")) n.classList.add('active');
+    });
+  }
+}
+
+// ── CAPTURE ──
+function selectTag(el) {
+  document.querySelectorAll('.ctag').forEach(t => t.classList.remove('on'));
+  el.classList.add('on');
+}
+function saveMoment() {
+  document.getElementById('before-overlay').classList.add('hidden');
+  goTo('home', null);
+  const d = document.createElement('div');
+  d.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#3D2800;color:#FFF8D6;padding:14px 24px;border-radius:14px;font-size:14px;font-weight:500;z-index:999;font-family:Plus Jakarta Sans,sans-serif;';
+  d.textContent = '✓ added to your day';
+  document.body.appendChild(d);
+  setTimeout(() => d.remove(), 2000);
+}
+
+// ── PEOPLE ──
+function giftAlert(name) {
+  const d = document.createElement('div');
+  d.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:flex-end;z-index:300;';
+  d.innerHTML = '<div style="background:white;border-radius:24px 24px 0 0;padding:24px 20px 36px;width:100%;font-family:Plus Jakarta Sans,sans-serif;"><div style="font-family:Playfair Display,serif;font-size:20px;color:#3D2800;margin-bottom:6px;">Gift for ' + name + '</div><div style="font-size:12px;color:#999;margin-bottom:18px;">Choose how to export your memories together</div><div onclick="this.closest(\'div[style*=inset]\').remove()" style="background:#FFF8D6;border:1px solid #F5CC4A;border-radius:12px;padding:12px 14px;margin-bottom:8px;cursor:pointer;"><div style="font-size:14px;font-weight:500;color:#3D2800;">Printed photo book</div><div style="font-size:11px;color:#999;margin-top:2px;">$19.99 · ships to your door</div></div><div onclick="this.closest(\'div[style*=inset]\').remove()" style="background:#FFF8D6;border:1px solid #F5CC4A;border-radius:12px;padding:12px 14px;margin-bottom:8px;cursor:pointer;"><div style="font-size:14px;font-weight:500;color:#3D2800;">Recap video</div><div style="font-size:11px;color:#999;margin-top:2px;">$2.99 · shareable link</div></div><div onclick="this.closest(\'div[style*=inset]\').remove()" style="background:#FFF8D6;border:1px solid #F5CC4A;border-radius:12px;padding:12px 14px;margin-bottom:16px;cursor:pointer;"><div style="font-size:14px;font-weight:500;color:#3D2800;">Private gift link</div><div style="font-size:11px;color:#999;margin-top:2px;">$3.99 · they open it in browser</div></div><div onclick="this.closest(\'div[style*=inset]\').remove()" style="text-align:center;font-size:13px;color:#999;cursor:pointer;">cancel</div></div>';
+  document.body.appendChild(d);
+}
+
+// ── POLLS ──
+function pickB(optId, color, radioId) {
+  ['bp1','bp2','bp3'].forEach(id => document.getElementById(id).className = 'poll-opt');
+  ['br1','br2','br3'].forEach(id => document.getElementById(id).className = 'opt-dot');
+  document.getElementById(optId).classList.add('sel-' + (color==='y'?'y':color));
+  document.getElementById(radioId).className = 'opt-dot on-' + (color==='y'?'y':color);
+  document.getElementById('before-btn').classList.add('ready');
+}
+function submitBefore() {
+  if (!document.getElementById('before-btn').classList.contains('ready')) return;
+  document.getElementById('before-overlay').classList.add('hidden');
+}
+function showAfterPoll() {
+  document.getElementById('after-overlay').classList.remove('hidden');
+}
+function pickA(optId, color, radioId) {
+  ['ap1','ap2','ap3'].forEach(id => document.getElementById(id).className = 'poll-opt');
+  ['ar1','ar2','ar3'].forEach(id => document.getElementById(id).className = 'opt-dot');
+  document.getElementById(optId).classList.add('sel-' + (color==='y'?'y':color));
+  document.getElementById(radioId).className = 'opt-dot on-' + (color==='y'?'y':color);
+  document.getElementById('after-btn').classList.add('ready');
+}
+function submitAfter() {
+  if (!document.getElementById('after-btn').classList.contains('ready')) return;
+  document.getElementById('after-overlay').classList.add('hidden');
+  goTo('home', null);
+  const d = document.createElement('div');
+  d.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#3D2800;color:#FFF8D6;padding:14px 28px;border-radius:14px;font-size:16px;font-weight:500;z-index:999;font-family:Playfair Display,serif;';
+  d.textContent = 'fiertoi.';
+  document.body.appendChild(d);
+  setTimeout(() => d.remove(), 2500);
+}
+
+// ── ENCOURAGE ──
+const ctxs = [
+  {hl:'grinding', sb:"They logged this a little while ago. They don't know you exist. You don't know who they are. You just know they're putting in the work.", tag:'grinding · right now'},
+  {hl:'studying', sb:"Someone is deep in it — notes, textbooks, the whole thing. They could use a reminder it's worth it.", tag:'studying · right now'},
+  {hl:'working out', sb:"They showed up when they didn't have to. That's the whole thing. They just need to know someone noticed.", tag:'working out · right now'},
+  {hl:'up early', sb:"While most people were asleep, this person was already at it. You don't know their story. But you know that kind of effort means something.", tag:'up early · right now'},
+];
+let ctxIdx = 0;
+function cycleCtx() {
+  ctxIdx = (ctxIdx + 1) % ctxs.length;
+  document.getElementById('enc-hl').textContent = ctxs[ctxIdx].hl;
+  document.getElementById('enc-sb').textContent = ctxs[ctxIdx].sb;
+  document.getElementById('enc-tag').textContent = ctxs[ctxIdx].tag;
+  document.getElementById('enc-ta').value = '';
+  document.getElementById('enc-chars').textContent = '280';
+  document.getElementById('enc-send').classList.remove('go');
+}
+function handleEnc(el) {
+  document.getElementById('enc-chars').textContent = 280 - el.value.length;
+  document.getElementById('enc-send').classList.toggle('go', el.value.trim().length >= 10);
+}
+function sendEnc() {
+  if (!document.getElementById('enc-send').classList.contains('go')) return;
+  document.getElementById('enc-ta').value = '';
+  document.getElementById('enc-chars').textContent = '280';
+  document.getElementById('enc-send').classList.remove('go');
+  const d = document.createElement('div');
+  d.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#3D2800;color:#FFF8D6;padding:16px 24px;border-radius:14px;font-size:14px;font-weight:500;z-index:999;font-family:Plus Jakarta Sans,sans-serif;text-align:center;max-width:260px;line-height:1.5;';
+  d.innerHTML = 'Sent.<br><span style="font-size:12px;opacity:0.7;font-weight:400;">Someone out there just got something real from a stranger. That\'s you.</span>';
+  document.body.appendChild(d);
+  setTimeout(() => d.remove(), 3000);
+}
+
+// ── COLOR PICKER ──
+function toggleCP() {
+  document.getElementById('cp-panel').classList.toggle('open');
+}
+function hexToRgb(hex) {
+  return { r:parseInt(hex.slice(1,3),16), g:parseInt(hex.slice(3,5),16), b:parseInt(hex.slice(5,7),16) };
+}
+function lighten(hex, a) {
+  const {r,g,b} = hexToRgb(hex);
+  return '#'+[r,g,b].map(c=>Math.min(255,Math.round(c+(255-c)*a)).toString(16).padStart(2,'0')).join('');
+}
+function darken(hex, a) {
+  const {r,g,b} = hexToRgb(hex);
+  return '#'+[r,g,b].map(c=>Math.max(0,Math.round(c*(1-a))).toString(16).padStart(2,'0')).join('');
+}
+function luminance(hex) {
+  const {r,g,b} = hexToRgb(hex);
+  return 0.299*r + 0.587*g + 0.114*b;
+}
+function applyColor(hex, sw) {
+  if (!hex || hex.length < 4) return;
+  const r = document.documentElement;
+  const isLight = luminance(hex) > 155;
+  const btnText = isLight ? darken(hex, 0.7) : '#FFFFFF';
+  r.style.setProperty('--yellow', hex);
+  r.style.setProperty('--yellow-light', lighten(hex, 0.88));
+  r.style.setProperty('--yellow-mid', lighten(hex, 0.5));
+  r.style.setProperty('--yellow-dark', darken(hex, 0.38));
+  r.style.setProperty('--yellow-deep', darken(hex, 0.65));
+  r.style.setProperty('--border', `rgba(${hexToRgb(hex).r},${hexToRgb(hex).g},${hexToRgb(hex).b},0.2)`);
+  document.querySelectorAll('.save-btn,.wrap-btn,.send-btn,.poll-btn').forEach(b => b.style.color = btnText);
+  document.querySelectorAll('.fiertoi-word').forEach(e => e.style.color = hex);
+  document.getElementById('cp-btn').style.background = hex;
+  document.querySelectorAll('.cp-sw').forEach(s => s.classList.remove('active'));
+  if (sw) sw.classList.add('active');
+  document.getElementById('cp-input').value = hex;
+  document.getElementById('cp-hex').value = hex;
+}
+function applyHex(val) {
+  if (!val.startsWith('#')) val = '#' + val;
+  if (val.length === 7) applyColor(val, null);
+}
+document.addEventListener('click', e => {
+  const p = document.getElementById('cp-panel'), b = document.getElementById('cp-btn');
+  if (!p.contains(e.target) && !b.contains(e.target)) p.classList.remove('open');
+});
+</script>
+</body>
+</html>
