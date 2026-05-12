@@ -110,54 +110,6 @@
       padding: 44px 52px 48px;
     }
 
-    /* Washi tape strips on each corner */
-    .waiting-card::before,
-    .waiting-card::after {
-      content: '';
-      position: absolute;
-      width: 54px;
-      height: 20px;
-      background: repeating-linear-gradient(
-        90deg,
-        rgba(180,155,90,0.55) 0px,
-        rgba(195,170,105,0.55) 3px,
-        rgba(165,140,75,0.5) 3px,
-        rgba(165,140,75,0.5) 6px
-      );
-      border-radius: 2px;
-      box-shadow: 1px 1px 3px rgba(0,0,0,0.15);
-    }
-
-    .waiting-card::before {
-      top: 28px; left: 12px;
-      transform: rotate(-50deg);
-    }
-
-    .waiting-card::after {
-      bottom: 32px; right: 12px;
-      transform: rotate(-50deg);
-    }
-
-    /* Two more tape pieces via wrapper divs */
-    .tape-tr, .tape-bl {
-      position: absolute;
-      width: 54px;
-      height: 20px;
-      background: repeating-linear-gradient(
-        90deg,
-        rgba(180,155,90,0.55) 0px,
-        rgba(195,170,105,0.55) 3px,
-        rgba(165,140,75,0.5) 3px,
-        rgba(165,140,75,0.5) 6px
-      );
-      border-radius: 2px;
-      box-shadow: 1px 1px 3px rgba(0,0,0,0.15);
-      pointer-events: none;
-    }
-
-    .tape-tr { top: 28px; right: 12px; transform: rotate(50deg); }
-    .tape-bl { bottom: 32px; left: 12px; transform: rotate(50deg); }
-
     .waiting-card h2 {
       font-family: 'Special Elite', monospace;
       font-size: 28px;
@@ -269,9 +221,7 @@
 
     <section class="waiting-section">
       <div class="waiting-card">
-        <div class="tape-tr"></div>
-        <div class="tape-bl"></div>
-        <h2>Join the waiting list</h2>
+        <h2>Join waiting list</h2>
         <p>Don't miss another moment, capture it with fiertoi.</p>
         <form id="waitlistForm" action="https://formspree.io/f/xbdwpdjr" method="POST">
           <input class="email-input" type="email" name="email" placeholder="your-email@fiertoi.com" required autocomplete="email" />
