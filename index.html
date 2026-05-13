@@ -282,7 +282,7 @@
     <div class="toggle-track" id="toggleTrack">
       <div class="toggle-thumb"></div>
     </div>
-    <span id="toggleLabel">feminine</span>
+    <span id="toggleLabel">cutesy</span>
   </button>
 
   <div class="page">
@@ -330,7 +330,7 @@
     themeToggle.addEventListener('click', () => {
       isNeutral = !isNeutral;
       toggleTrack.classList.toggle('neutral', isNeutral);
-      toggleLabel.textContent = isNeutral ? 'neutral' : 'feminine';
+      toggleLabel.textContent = isNeutral ? 'neutral' : 'cutesy';
       document.body.classList.toggle('neutral', isNeutral);
       featuresImg.src = isNeutral ? 'images/features_neutral.png' : 'images/features.png';
     });
